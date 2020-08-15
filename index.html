@@ -1,0 +1,158 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+  
+    <!-- Controller container -->
+    <div class="container" id="controls">
+      Click Number of Pins Knocked Down<br>
+      <div class="d-flex">
+        <div class="btn-group mr-2 p-2" role="group" aria-label="Pin Count" id="pins">
+        </div>
+        <div class="btn-group mr-2 ml-auto p-2" role="group" aria-label="Pin Count"><button type="button" class="btn btn-success btn-sm" id="addPlayer">Add Player</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2">Reset</button></div></div>
+    </div>
+    
+    <!-- Game container -->
+    <div class="container" id="game">
+    </div>
+    
+    <!-- Edit player modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="editPlayer">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Player</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="text" class="form-control mb-5" aria-describedby="nameHelp" placeholder="Enter Name" id="playerName">
+            <label for="handicapSelecter" id="handicapSelecterLabel"></label><br>
+            <input type="range" class="custom-range w-100" min="0" max="300" id="handicapSelecter" onmousemove="updateHandicapLabel(this.value)">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="savePlayer">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delete player modal -->
+    <div class="modal" tabindex="-1" id="confirmDeletePlayer">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Player</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" id="deletePlayer">DELETE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  </body>
+  <script>
+
+    players = [];
+    playerIndex = 0;
+    
+    $('#editPlayer').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget);
+      playerIndex = button.data('player-index');
+      $("#playerName").val(players[playerIndex].name);
+      $("#handicapSelecterLabel").html("Handicap: "+players[playerIndex].handicap);
+      $("#handicapSelecter").val(players[playerIndex].handicap);
+    });
+    
+    $('#confirmDeletePlayer').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget);
+      playerIndex = button.data('player-index');
+    });
+    
+    $("#savePlayer").click(function(){
+      if($("#playerName").val().trim() != ""){
+        players[playerIndex].name = $("#playerName").val();
+      }
+      $("#playerButton"+playerIndex).html(players[playerIndex].name);
+      players[playerIndex].handicap = $("#handicapSelecter").val();
+      $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
+      $("#editPlayer").modal('hide');
+    });
+    
+    $("#deletePlayer").click(function(){
+      players.splice(playerIndex, 1);
+      var html = "";
+      for(var p=0; p<players.length; p++){
+        playerIndex = p;
+        html += generateScoreBox();
+      }
+      $("#game").html(html);
+      for(var p=0; p<players.length; p++){
+        $("#handicapValue"+p).html(players[p].handicap);
+      }
+      $("#confirmDeletePlayer").modal('hide');
+    });
+    
+    $("#addPlayer").click(function(){
+      playerIndex = players.length;
+      players.push({name: "Player "+(playerIndex+1), handicap: 0});
+      var html = $("#game").html();
+      html += generateScoreBox();
+      $("#game").html(html);
+      $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
+    });
+    
+    function generateScoreBox(){
+      var html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
+      for(var i=1; i<=9; i++){
+        html += '<th colspan="2" scope="col" style="width: 30px">'+i+'</th>';
+      }
+      html += '<th colspan="3" scope="col" style="width: 30px">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
+      for(var i=0; i<21; i++){
+        html += '<td scope="col"></th>';
+      }
+      html += '<td scope="col" colspan="2" id="handicapValue'+playerIndex+'"></td><td scope="col" colspan="2"></td></tr><tr style="height: 30px">';
+      for(var i=0; i<9; i++){
+        html += '<td scope="col" colspan="2"></td>';
+      }
+      html += '<td scope="col" colspan="3"></td></tr></tbody></table>';
+      return html;
+    }
+    
+    function generatePinButtons(count){
+      var html = '';
+      for(var i=0; i<=count; i++){
+        html += '<button type="button" class="btn btn-secondary">'+i+'</button>';
+      }
+      return html;
+    }
+    
+    function updateHandicapLabel(value){
+      $("#handicapSelecterLabel").html("Handicap: "+value);
+    }
+    
+    $(document).ready(function(){
+      playerIndex = players.length;
+      players.push({name: "Player "+(playerIndex+1), handicap: 0});
+      $("#game").html(generateScoreBox());
+      $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
+      $("#pins").html(generatePinButtons(10));
+    });
+    
+  </script>
+</html>
