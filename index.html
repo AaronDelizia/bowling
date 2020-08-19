@@ -138,6 +138,9 @@
     });
     
     $("#deletePlayer").click(function(){
+      if(playerIndex == players.length-1){
+        currentPlayer = 0;
+      }
       players.splice(playerIndex, 1);
       generateScoreBox();
       for(var p=0; p<players.length; p++){
