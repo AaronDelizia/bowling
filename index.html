@@ -279,6 +279,13 @@
       players.push({ name: "Player "+(players.length+1), handicap: 0, frames: frames, frameScores: frameScores });
     }
     
+    function test(){
+      for(var p=0; p<players.length; p++){
+        for(var f=0; f<10; f++){
+          console.log(getFrameColor(p, f));
+        }
+      }
+    }
     
     function generateScoreBox(){
       
@@ -288,7 +295,7 @@
         playerIndex = p;
         var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
         for(var i=1; i<=9; i++){
-          player_html += '<th colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'">'+i+'</th>';
+          player_html += '<th colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'" onclick="test('+i+')" style="cursor: pointer">'+i+'</th>';
         }
         player_html += '<th colspan="3" scope="col" style="width: 30px" id="player'+playerIndex+'_frame10">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
         for(var i=0; i<21; i++){
@@ -415,6 +422,7 @@
             max_score -= max_deduction;
             total_score += frameScores[score];
             $("#player"+playerIndex+"_frameScore"+score).html(total_score);
+            setFinishedFrame(playerIndex, score);
           }
         }
         $("#handicapValue"+playerIndex).html(parseInt(total_score)+parseInt(players[playerIndex].handicap));
@@ -445,6 +453,15 @@
       changeFrameColor(player, frame, "#add8e6");
     }
     
+    function setFinishedFrame(player, frame){
+      for(var p=0; p<players.length; p++){
+        for(var f=0; f<10; f++){
+          changeFrameColor(p, f, getFrameColor(p, f));
+        }
+      }
+      changeFrameColor(player, frame, "#ffff99");
+    }
+    
     function changeFrameColor(player, frame, color){
       $("#player"+player+"_frame"+frame).css("background-color", color);
       $("#player"+player+"_frame"+frame).css("background-color", color);
@@ -454,6 +471,10 @@
       if(frame == 10){
         $("#player"+player+"_frame"+frame+"-3").css("background-color", color);
       }
+    }
+    
+    function getFrameColor(player, frame){
+      return $("#player"+player+"_frame"+frame).css("background-color");
     }
     
     $(document).ready(function(){
