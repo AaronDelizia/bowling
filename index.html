@@ -6,11 +6,11 @@
   
     <!-- Controller container -->
     <div class="container" id="controls">
-      <label class="mr-2 p-2">Click Number of Pins Knocked Down</label><br>
+      <!--<label class="mr-2 p-2">Click Number of Pins Knocked Down</label><br>-->
       <div class="d-flex">
         <div class="btn-group mr-2 p-2" role="group" aria-label="Pin Count" id="pins">
         </div>
-        <div class="btn-group mr-2 ml-auto p-2" role="group" aria-label="Pin Count"><button type="button" class="btn btn-success btn-sm" id="addPlayer">Add Player</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2">Reset</button></div></div>
+        <div class="btn-group mr-2 ml-auto p-2" role="group" aria-label="Game Control"><button type="button" class="btn btn-success btn-sm" id="addPlayer">Add Player</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmResetGame">Reset</button></div></div>
     </div>
     
     <!-- Game container -->
@@ -61,6 +61,27 @@
       </div>
     </div>
     
+    <!-- Reset game modal -->
+    <div class="modal" tabindex="-1" id="confirmResetGame">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reset Game</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" id="resetGame">RESET</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -68,8 +89,11 @@
   </body>
   <script>
 
-    players = [];
-    playerIndex = 0;
+    var players = [];
+    var currentPlayer = 0;
+    var currentFrame = 1;
+    var currentSubFrame = 1;
+    var playerIndex = 0;
     
     $('#editPlayer').on('show.bs.modal', function (event) {
       var button = $(event.relatedTarget);
@@ -77,6 +101,25 @@
       $("#playerName").val(players[playerIndex].name);
       $("#handicapSelecterLabel").html("Handicap: "+players[playerIndex].handicap);
       $("#handicapSelecter").val(players[playerIndex].handicap);
+    });
+    
+    $("#resetGame").click(function(){
+      for(p=0; p<players.length; p++){
+        for(var frame in  players[p].frames){
+          for(var sub in players[p].frames[frame]){
+            players[p].frames[frame][sub] = null;
+          }
+        }
+        for(var score in  players[p].frameScores){
+          players[p].frameScores[score] = null;
+        }
+      }
+      currentPlayer = 0;
+      currentFrame = 1;
+      currentSubFrame = 1;
+      generateScoreBox();
+      setActiveFrame(0, 1);
+      $("#confirmResetGame").modal('hide');
     });
     
     $('#confirmDeletePlayer').on('show.bs.modal', function (event) {
@@ -96,49 +139,301 @@
     
     $("#deletePlayer").click(function(){
       players.splice(playerIndex, 1);
-      var html = "";
-      for(var p=0; p<players.length; p++){
-        playerIndex = p;
-        html += generateScoreBox();
-      }
-      $("#game").html(html);
+      generateScoreBox();
       for(var p=0; p<players.length; p++){
         $("#handicapValue"+p).html(players[p].handicap);
       }
       $("#confirmDeletePlayer").modal('hide');
+      console.log(players);
     });
     
     $("#addPlayer").click(function(){
-      playerIndex = players.length;
-      players.push({name: "Player "+(playerIndex+1), handicap: 0});
-      var html = $("#game").html();
-      html += generateScoreBox();
-      $("#game").html(html);
+      addPlayer();
+      generateScoreBox();
       $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
     });
     
+    function advanceGame(pinCount){
+      
+      // Score keeping logic
+      players[currentPlayer].frames[currentFrame][currentSubFrame] = pinCount;
+      var thisFrame_sub1Pins = players[currentPlayer].frames[currentFrame][1];
+      var thisFrame_sub2Pins = players[currentPlayer].frames[currentFrame][2];
+      if(currentFrame == 1){
+        if(currentSubFrame == 2 && (thisFrame_sub1Pins + thisFrame_sub2Pins) < 10){
+          players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
+        }
+      }
+      else if(currentFrame > 1){
+        var lastFrame_sub1Pins = players[currentPlayer].frames[currentFrame-1][1];
+        var lastFrame_sub2Pins = players[currentPlayer].frames[currentFrame-1][2];
+        if(currentSubFrame == 1 && (lastFrame_sub1Pins + lastFrame_sub2Pins) == 10){
+          players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + lastFrame_sub2Pins + thisFrame_sub1Pins;
+        }
+        else if(currentSubFrame == 2){
+          if((thisFrame_sub1Pins + thisFrame_sub2Pins) < 10){
+            players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
+            if(lastFrame_sub1Pins == 10){
+              players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
+            }
+          }
+          else if((thisFrame_sub1Pins + thisFrame_sub2Pins) == 10){
+            if(lastFrame_sub1Pins == 10){
+              players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
+            }
+          }
+        }
+        if(currentFrame > 2){
+          var oneBeforeLastFrame_sub1Pins = players[currentPlayer].frames[currentFrame-2][1];
+          var oneBeforeLastFrame_sub2Pins = players[currentPlayer].frames[currentFrame-2][2];
+          if(currentSubFrame == 1 && lastFrame_sub1Pins == 10 && oneBeforeLastFrame_sub1Pins == 10){
+            players[currentPlayer].frameScores[currentFrame-2] = thisFrame_sub1Pins + lastFrame_sub1Pins + oneBeforeLastFrame_sub1Pins;
+          }
+          if(currentFrame == 10){
+            var thisFrame_sub3Pins = players[currentPlayer].frames[currentFrame][3];
+            if(currentSubFrame == 2 && lastFrame_sub1Pins == 10 && thisFrame_sub1Pins == 10){
+              players[currentPlayer].frameScores[currentFrame-1] = thisFrame_sub1Pins + lastFrame_sub1Pins + thisFrame_sub2Pins;
+            }
+            else if(currentSubFrame == 3){
+              players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub3Pins;
+            }
+          }
+        }
+      }
+      
+      // Rotate player & frame logic
+      if(players.length > 1 && currentPlayer == players.length-1){
+        currentPlayer = 0;
+        if(currentSubFrame == 1){
+          currentSubFrame++;
+        }
+        else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+          currentSubFrame++;
+        }
+        else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+          currentSubFrame++;
+        }
+        else{
+          currentSubFrame = 1;
+          currentFrame++;
+        }
+      }
+      else if(players.length > 1 && currentPlayer < players.length-1){
+        currentPlayer++;
+      }
+      else if(players.length == 1){
+        if(currentSubFrame == 1){
+          currentSubFrame++;
+        }
+        else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+          currentSubFrame++;
+        }
+        else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+          currentSubFrame++;
+        }
+        else{
+          currentSubFrame = 1;
+          currentFrame++;
+        }
+      }
+      if(currentFrame < 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
+        advanceGame(10);
+      }
+      
+      // Set available pins logic
+      if(currentSubFrame == 2){
+        if(currentFrame < 10){
+          var available_pins = 10-players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+          $("#pins").html(generatePinButtons(available_pins));
+        }
+        else if(currentFrame == 10 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
+          $("#pins").html(generatePinButtons(10));
+        }
+        else if(currentFrame == 10 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] < 10){
+          var available_pins = 10-players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+          $("#pins").html(generatePinButtons(available_pins));
+        }
+      }
+      else if(currentSubFrame == 1 || currentSubFrame == 3){
+        if(currentFrame == 11){
+          $("#pins").html(generatePinButtons(-1));
+        }
+        else{
+          $("#pins").html(generatePinButtons(10));
+        }
+      }
+      console.log("current player: "+currentPlayer);
+      console.log("current frame: "+currentFrame);
+      console.log("current sub-frame: "+currentSubFrame);
+      generateScoreBox();
+    }
+    
+    function addPlayer(){
+      var frames = {};
+      var frameScores = {};
+      for(var f=0; f<10; f++){
+        frames[f+1] = {};
+        frames[f+1][1] = null;
+        frames[f+1][2] = null;
+        if(f == 9){
+          frames[f+1][3] = null;
+        }
+        frameScores[f+1] = null;
+      }
+      players.push({ name: "Player "+(players.length+1), handicap: 0, frames: frames, frameScores: frameScores });
+      console.log(players);
+    }
+    
+    
     function generateScoreBox(){
-      var html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
-      for(var i=1; i<=9; i++){
-        html += '<th colspan="2" scope="col" style="width: 30px">'+i+'</th>';
+      
+      // Generate HTML tags for scorebox
+      var html = "";
+      for(var p=0; p<players.length; p++){
+        playerIndex = p;
+        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
+        for(var i=1; i<=9; i++){
+          player_html += '<th colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'">'+i+'</th>';
+        }
+        player_html += '<th colspan="3" scope="col" style="width: 30px" id="player'+playerIndex+'_frame10">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
+        for(var i=0; i<21; i++){
+          if(i==0){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame1-1"></td>';
+          }
+          else if(i==1){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame1-2"></td>';
+          }
+          else if(i==2){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame2-1"></td>';
+          }
+          else if(i==3){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame2-2"></td>';
+          }
+          else if(i==4){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame3-1"></td>';
+          }
+          else if(i==5){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame3-2"></td>';
+          }
+          else if(i==6){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame4-1"></td>';
+          }
+          else if(i==7){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame4-2"></td>';
+          }
+          else if(i==8){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame5-1"></td>';
+          }
+          else if(i==9){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame5-2"></td>';
+          }
+          else if(i==10){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame6-1"></td>';
+          }
+          else if(i==11){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame6-2"></td>';
+          }
+          else if(i==12){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame7-1"></td>';
+          }
+          else if(i==13){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame7-2"></td>';
+          }
+          else if(i==14){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame8-1"></td>';
+          }
+          else if(i==15){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame8-2"></td>';
+          }
+          else if(i==16){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame9-1"></td>';
+          }
+          else if(i==17){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame9-2"></td>';
+          }
+          else if(i==18){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-1"></td>';
+          }
+          else if(i==19){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-2"></td>';
+          }
+          else if(i==20){
+            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-3"></td>';
+          }
+        }
+        player_html += '<td scope="col" colspan="2" id="handicapValue'+playerIndex+'"></td><td scope="col" colspan="2" id="maxScore'+playerIndex+'"></td></tr><tr style="height: 30px">';
+        for(var i=0; i<9; i++){
+          player_html += '<td scope="col" colspan="2" id="player'+playerIndex+'_frameScore'+(i+1)+'"></td>';
+        }
+        player_html += '<td scope="col" colspan="3" id="player'+playerIndex+'_frameScore10"></td></tr></tbody></table>';
+        html += player_html;
       }
-      html += '<th colspan="3" scope="col" style="width: 30px">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
-      for(var i=0; i<21; i++){
-        html += '<td scope="col"></th>';
+      $("#game").html(html);
+      
+      // Update scorebox values
+      setActiveFrame(currentPlayer, currentFrame)
+      for(var p=0; p<players.length; p++){
+        playerIndex = p;
+        $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
+        var frames = players[playerIndex].frames;
+        for(var frame in frames){
+          if(frames[frame][1] != null){
+            if(frame < 10 && frames[frame][1] == 10){
+              $("#player"+playerIndex+"_frame"+frame+"-1").html("");
+              $("#player"+playerIndex+"_frame"+frame+"-2").html("X");
+            }
+            else if (frame == 10 && frames[frame][1] == 10){
+              $("#player"+playerIndex+"_frame"+frame+"-1").html("X");
+            }
+            else if(frames[frame][1] < 10){
+              $("#player"+playerIndex+"_frame"+frame+"-1").html(frames[frame][1]);
+            }
+          }
+          if(frames[frame][2] != null){
+            if(frames[frame][2] < 10){
+              if(frames[frame][1] < 10 && (frames[frame][1]+frames[frame][2]) == 10){
+                $("#player"+playerIndex+"_frame"+frame+"-2").html("/");
+              }
+              else if(frames[frame][1] < 10 && (frames[frame][1]+frames[frame][2]) < 10){
+                $("#player"+playerIndex+"_frame"+frame+"-2").html(frames[frame][2]);
+              }
+            }
+            else if(frame == 10 && frames[frame][2] == 10){
+              $("#player"+playerIndex+"_frame"+frame+"-2").html("X");
+            }
+          }
+          if(frame == 10 && frames[frame][3] != null){
+            if(frames[frame][3] == 10){
+              $("#player"+playerIndex+"_frame"+frame+"-3").html("X");
+            }
+            else{
+              $("#player"+playerIndex+"_frame"+frame+"-3").html(frames[frame][3]);
+            }
+          }
+        }
+        var frameScores = players[playerIndex].frameScores;
+        var total_score = 0;
+        var max_score = 300;
+        for(var score in frameScores){
+          if(frameScores[score] != null){
+            var max_deduction = 30-frameScores[score];
+            max_score -= max_deduction;
+            total_score += frameScores[score];
+            $("#player"+playerIndex+"_frameScore"+score).html(total_score);
+          }
+        }
+        $("#handicapValue"+playerIndex).html(parseInt(total_score)+parseInt(players[playerIndex].handicap));
+        $("#maxScore"+playerIndex).html(max_score);
       }
-      html += '<td scope="col" colspan="2" id="handicapValue'+playerIndex+'"></td><td scope="col" colspan="2"></td></tr><tr style="height: 30px">';
-      for(var i=0; i<9; i++){
-        html += '<td scope="col" colspan="2"></td>';
-      }
-      html += '<td scope="col" colspan="3"></td></tr></tbody></table>';
-      return html;
     }
     
     function generatePinButtons(count){
-      var html = '';
+      //var html = '<button type="button" class="btn btn-success" onclick="previusTurn()"><<</button>';
+      var html = ''
       for(var i=0; i<=count; i++){
-        html += '<button type="button" class="btn btn-secondary">'+i+'</button>';
+        html += '<button type="button" class="btn btn-secondary" onclick="advanceGame('+i+')">'+i+'</button>';
       }
+      //html += '<button type="button" class="btn btn-success" onclick="skipTurn()">>></button>';
       return html;
     }
     
@@ -146,12 +441,38 @@
       $("#handicapSelecterLabel").html("Handicap: "+value);
     }
     
+    function setActiveFrame(player, frame){
+      for(var p=0; p<players.length; p++){
+        for(var f=0; f<10; f++){
+          changeFrameColor(p, f, "white");
+        }
+      }
+      changeFrameColor(player, frame, "#add8e6");
+    }
+    
+    function changeFrameColor(player, frame, color){
+      $("#player"+player+"_frame"+frame).css("background-color", color);
+      $("#player"+player+"_frame"+frame).css("background-color", color);
+      $("#player"+player+"_frameScore"+frame).css("background-color", color);
+      $("#player"+player+"_frame"+frame+"-1").css("background-color", color);
+      $("#player"+player+"_frame"+frame+"-2").css("background-color", color);
+      if(frame == 10){
+        $("#player"+player+"_frame"+frame+"-3").css("background-color", color);
+      }
+    }
+    
     $(document).ready(function(){
-      playerIndex = players.length;
-      players.push({name: "Player "+(playerIndex+1), handicap: 0});
-      $("#game").html(generateScoreBox());
+      //playerIndex = players.length;
+      //players.push({name: "Player "+(playerIndex+1), handicap: 0, frames:[]});
+      addPlayer();
+      //$("#game").html(generateScoreBox());
+      generateScoreBox();
       $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
       $("#pins").html(generatePinButtons(10));
+      setActiveFrame(0, 1);
+      console.log("current player: "+currentPlayer);
+      console.log("current frame: "+currentFrame);
+      console.log("current sub-frame: "+currentSubFrame);
     });
     
   </script>
