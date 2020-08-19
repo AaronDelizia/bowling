@@ -293,7 +293,7 @@
       var html = "";
       for(var p=0; p<players.length; p++){
         playerIndex = p;
-        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
+        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col" style="background-color: #e6e6e6"><div class="d-flex"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
         for(var i=1; i<=9; i++){
           player_html += '<th colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'" onclick="test('+i+')" style="cursor: pointer">'+i+'</th>';
         }
