@@ -415,6 +415,9 @@
               $("#player"+playerIndex+"_frame"+frame+"-3").html(frames[frame][3]);
             }
           }
+          if(frames[frame][1] != null && frames[frame][2] != null){
+            setFinishedFrame(playerIndex, frame);
+          }
         }
         var frameScores = players[playerIndex].frameScores;
         var total_score = 0;
@@ -425,7 +428,7 @@
             max_score -= max_deduction;
             total_score += frameScores[score];
             $("#player"+playerIndex+"_frameScore"+score).html(total_score);
-            setFinishedFrame(playerIndex, score);
+            //setFinishedFrame(playerIndex, score);
           }
         }
         $("#handicapValue"+playerIndex).html(parseInt(total_score)+parseInt(players[playerIndex].handicap));
