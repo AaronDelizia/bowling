@@ -93,7 +93,10 @@
     var currentPlayer = 0;
     var currentFrame = 1;
     var currentSubFrame = 1;
+    var selectedPlayer = 0;
+    var selectedFrame = 1;
     var playerIndex = 0;
+    var editMode = false;
     
     $('#editPlayer').on('show.bs.modal', function (event) {
       var button = $(event.relatedTarget);
@@ -117,6 +120,8 @@
       currentPlayer = 0;
       currentFrame = 1;
       currentSubFrame = 1;
+      selectedPlayer = 0;
+      selectedFrame = 1;
       generateScoreBox();
       setActiveFrame(0, 1);
       $("#confirmResetGame").modal('hide');
@@ -156,117 +161,146 @@
     });
     
     function advanceGame(pinCount){
-      
+      if(currentPlayer != selectedPlayer || currentFrame != selectedFrame){
+        var player = selectedPlayer;
+        var frame = selectedFrame;
+        editMode = true;
+      }
+      else{
+        var player = currentPlayer;
+        var frame = currentFrame;
+        editMode = false;
+      }
       // Score keeping logic
-      players[currentPlayer].frames[currentFrame][currentSubFrame] = pinCount;
+      players[player].frames[frame][currentSubFrame] = pinCount;
       if(currentSubFrame == 1){
-        players[currentPlayer].frames[currentFrame][2] = null;
-        if(currentFrame == 10){
-          players[currentPlayer].frames[currentFrame][3] = null;
+        players[player].frames[frame][2] = null;
+        if(frame == 10){
+          players[player].frames[frame][3] = null;
         }
       }
-      else if(currentSubFrame == 2 && currentFrame == 10){
-        players[currentPlayer].frames[currentFrame][3] = null;
+      else if(currentSubFrame == 2 && frame == 10){
+        players[player].frames[frame][3] = null;
       }
-      var thisFrame_sub1Pins = players[currentPlayer].frames[currentFrame][1];
-      var thisFrame_sub2Pins = players[currentPlayer].frames[currentFrame][2];
-      if(currentFrame == 1){
+      var thisFrame_sub1Pins = players[player].frames[frame][1];
+      var thisFrame_sub2Pins = players[player].frames[frame][2];
+      if(frame == 1){
         if(currentSubFrame == 2 && (thisFrame_sub1Pins + thisFrame_sub2Pins) < 10){
-          players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
+          players[player].frameScores[frame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
         }
       }
-      else if(currentFrame > 1){
-        var lastFrame_sub1Pins = players[currentPlayer].frames[currentFrame-1][1];
-        var lastFrame_sub2Pins = players[currentPlayer].frames[currentFrame-1][2];
+      else if(frame > 1){
+        var lastFrame_sub1Pins = players[player].frames[frame-1][1];
+        var lastFrame_sub2Pins = players[player].frames[frame-1][2];
         if(currentSubFrame == 1 && (lastFrame_sub1Pins + lastFrame_sub2Pins) == 10){
-          players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + lastFrame_sub2Pins + thisFrame_sub1Pins;
+          players[player].frameScores[frame-1] = lastFrame_sub1Pins + lastFrame_sub2Pins + thisFrame_sub1Pins;
         }
         else if(currentSubFrame == 2){
           if((thisFrame_sub1Pins + thisFrame_sub2Pins) < 10){
-            players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
+            players[player].frameScores[frame] = thisFrame_sub1Pins + thisFrame_sub2Pins;
             if(lastFrame_sub1Pins == 10){
-              players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
+              players[player].frameScores[frame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
             }
           }
           else if((thisFrame_sub1Pins + thisFrame_sub2Pins) == 10){
             if(lastFrame_sub1Pins == 10){
-              players[currentPlayer].frameScores[currentFrame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
+              players[player].frameScores[frame-1] = lastFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub1Pins;
             }
           }
         }
-        if(currentFrame > 2){
-          var oneBeforeLastFrame_sub1Pins = players[currentPlayer].frames[currentFrame-2][1];
-          var oneBeforeLastFrame_sub2Pins = players[currentPlayer].frames[currentFrame-2][2];
+        if(frame > 2){
+          var oneBeforeLastFrame_sub1Pins = players[player].frames[frame-2][1];
+          var oneBeforeLastFrame_sub2Pins = players[player].frames[frame-2][2];
           if(currentSubFrame == 1 && lastFrame_sub1Pins == 10 && oneBeforeLastFrame_sub1Pins == 10){
-            players[currentPlayer].frameScores[currentFrame-2] = thisFrame_sub1Pins + lastFrame_sub1Pins + oneBeforeLastFrame_sub1Pins;
+            players[player].frameScores[frame-2] = thisFrame_sub1Pins + lastFrame_sub1Pins + oneBeforeLastFrame_sub1Pins;
           }
-          if(currentFrame == 10){
-            var thisFrame_sub3Pins = players[currentPlayer].frames[currentFrame][3];
+          if(frame == 10){
+            var thisFrame_sub3Pins = players[player].frames[frame][3];
             if(currentSubFrame == 2 && lastFrame_sub1Pins == 10 && thisFrame_sub1Pins == 10){
-              players[currentPlayer].frameScores[currentFrame-1] = thisFrame_sub1Pins + lastFrame_sub1Pins + thisFrame_sub2Pins;
+              players[player].frameScores[frame-1] = thisFrame_sub1Pins + lastFrame_sub1Pins + thisFrame_sub2Pins;
             }
             else if(currentSubFrame == 3){
-              players[currentPlayer].frameScores[currentFrame] = thisFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub3Pins;
+              players[player].frameScores[frame] = thisFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub3Pins;
             }
           }
         }
       }
       
       // Rotate player & frame logic
-      if(players.length > 1 && currentPlayer == players.length-1){
-        currentPlayer = 0;
+      if(!editMode){
+        if(players.length > 1 && currentPlayer == players.length-1){
+          currentPlayer = 0;
+          selectedPlayer = 0;
+          if(currentSubFrame == 1){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+            currentSubFrame++;
+          }
+          else{
+            currentSubFrame = 1;
+            currentFrame++;
+            selectedFrame++;
+          }
+        }
+        else if(players.length > 1 && currentPlayer < players.length-1){
+          currentPlayer++;
+          selectedPlayer++;
+        }
+        else if(players.length == 1){
+          if(currentSubFrame == 1){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+            currentSubFrame++;
+          }
+          else{
+            currentSubFrame = 1;
+            currentFrame++;
+            selectedFrame++;
+          }
+        }
+        if(currentFrame < 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
+          advanceGame(10);
+        }
+      }
+      else{
         if(currentSubFrame == 1){
           currentSubFrame++;
         }
-        else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+        else if(selectedFrame == 10 && currentSubFrame == 2 && pinCount == 10){
           currentSubFrame++;
         }
-        else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+        else if(selectedFrame == 10 && currentSubFrame == 2 && (players[selectedPlayer].frames[selectedFrame][currentSubFrame-1]+players[selectedPlayer].frames[selectedFrame][currentSubFrame] == 10)){
           currentSubFrame++;
         }
         else{
           currentSubFrame = 1;
-          currentFrame++;
         }
-      }
-      else if(players.length > 1 && currentPlayer < players.length-1){
-        currentPlayer++;
-      }
-      else if(players.length == 1){
-        if(currentSubFrame == 1){
-          currentSubFrame++;
-        }
-        else if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
-          currentSubFrame++;
-        }
-        else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
-          currentSubFrame++;
-        }
-        else{
-          currentSubFrame = 1;
-          currentFrame++;
-        }
-      }
-      if(currentFrame < 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
-        advanceGame(10);
       }
       
       // Set available pins logic
       if(currentSubFrame == 2){
-        if(currentFrame < 10){
-          var available_pins = 10-players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+        if(frame < 10){
+          var available_pins = 10-players[player].frames[frame][currentSubFrame-1];
           $("#pins").html(generatePinButtons(available_pins));
         }
-        else if(currentFrame == 10 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
+        else if(frame == 10 && players[player].frames[frame][currentSubFrame-1] == 10){
           $("#pins").html(generatePinButtons(10));
         }
-        else if(currentFrame == 10 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] < 10){
-          var available_pins = 10-players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+        else if(frame == 10 && players[player].frames[frame][currentSubFrame-1] < 10){
+          var available_pins = 10-players[player].frames[frame][currentSubFrame-1];
           $("#pins").html(generatePinButtons(available_pins));
         }
       }
       else if(currentSubFrame == 1 || currentSubFrame == 3){
-        if(currentFrame == 11){
+        if(frame == 11){
           $("#pins").html(generatePinButtons(-1));
         }
         else{
@@ -439,7 +473,7 @@
         $("#handicapValue"+playerIndex).html(parseInt(total_score)+parseInt(players[playerIndex].handicap));
         $("#maxScore"+playerIndex).html(max_score);
       }
-      setActiveFrame(currentPlayer, currentFrame);
+      setActiveFrame(selectedPlayer, selectedFrame);
     }
     
     function generatePinButtons(count){
@@ -453,30 +487,35 @@
     }
     
     function setPlayer(player){
-      currentPlayer = player;
-      adjustSubFrame();
+      selectedPlayer = player;
+      //currentPlayer = player;
+      //adjustSubFrame();
       generateScoreBox();
     }
     
     function previousFrame(){
-      if(currentFrame > 1){
-        currentFrame--;
+      if(selectedFrame > 1){
+        //currentFrame--;
+        selectedFrame--;
       }
       else{
-        currentFrame = 10;
+        //currentFrame = 10;
+        selectedFrame = 10;
       }
-      adjustSubFrame();
+      //adjustSubFrame();
       generateScoreBox();
     }
     
     function nextFrame(){
-      if(currentFrame < 10){
-        currentFrame++;
+      if(selectedFrame < 10){
+        //currentFrame++;
+        selectedFrame++;
       }
       else{
-        currentFrame = 1;
+        //currentFrame = 1;
+        selectedFrame = 1;
       }
-      adjustSubFrame();
+      //adjustSubFrame();
       generateScoreBox();
     }
     
@@ -529,6 +568,8 @@
     }
     
     function setActiveFrame(player, frame){
+      console.log(player);
+      console.log(frame);
       for(var p=0; p<players.length; p++){
         for(var f=0; f<10; f++){
           changeFrameColor(p, f, getFrameColor(p, f));
