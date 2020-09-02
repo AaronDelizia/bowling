@@ -287,30 +287,35 @@
       }
       
       // Set available pins logic
-      if(currentSubFrame == 2){
-        if(frame < 10){
-          var available_pins = 10-players[selectedPlayer].frames[currentFrame][currentSubFrame-1];
-          console.log("available pins: "+available_pins);
-          console.log("player: "+currentPlayer);
-          console.log("frame: "+currentFrame);
-          console.log("edit mode: "+editMode);
-          $("#pins").html(generatePinButtons(available_pins));
+      if(!editMode){
+        if(currentSubFrame == 2){
+          if(frame < 10){
+            var available_pins = 10-players[selectedPlayer].frames[currentFrame][currentSubFrame-1];
+            console.log("available pins: "+available_pins);
+            console.log("player: "+currentPlayer);
+            console.log("frame: "+currentFrame);
+            console.log("edit mode: "+editMode);
+            $("#pins").html(generatePinButtons(available_pins));
+          }
+          else if(currentFrame == 10 && players[selectedPlayer].frames[currentFrame][currentSubFrame-1] == 10){
+            $("#pins").html(generatePinButtons(10));
+          }
+          else if(currentFrame == 10 && players[selectedPlayer].frames[currentFrame][currentSubFrame-1] < 10){
+            var available_pins = 10-players[selectedPlayer].frames[currentFrame][currentSubFrame-1];
+            $("#pins").html(generatePinButtons(available_pins));
+          }
         }
-        else if(currentFrame == 10 && players[selectedPlayer].frames[currentFrame][currentSubFrame-1] == 10){
-          $("#pins").html(generatePinButtons(10));
-        }
-        else if(currentFrame == 10 && players[selectedPlayer].frames[currentFrame][currentSubFrame-1] < 10){
-          var available_pins = 10-players[selectedPlayer].frames[currentFrame][currentSubFrame-1];
-          $("#pins").html(generatePinButtons(available_pins));
+        else if(currentSubFrame == 1 || currentSubFrame == 3){
+          if(currentFrame == 11){
+            $("#pins").html(generatePinButtons(-1));
+          }
+          else{
+            $("#pins").html(generatePinButtons(10));
+          }
         }
       }
-      else if(currentSubFrame == 1 || currentSubFrame == 3){
-        if(currentFrame == 11){
-          $("#pins").html(generatePinButtons(-1));
-        }
-        else{
-          $("#pins").html(generatePinButtons(10));
-        }
+      else{
+        $("#pins").html(generatePinButtons(10));
       }
       generateScoreBox();
     }
