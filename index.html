@@ -8,7 +8,7 @@
     <div class="container" id="controls">
       <!--<label class="mr-2 p-2">Click Number of Pins Knocked Down</label><br>-->
       <div class="d-flex">
-        <div class="btn-group mr-2 p-2" role="group" aria-label="Pin Count" id="pins">
+        <div aria-label="Pin Count" id="pins">
         </div>
         <div class="btn-group mr-2 ml-auto p-2" role="group" aria-label="Game Control"><button type="button" class="btn btn-success btn-sm" id="addPlayer">Add Player</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmResetGame">Reset</button></div></div>
     </div>
@@ -490,12 +490,12 @@
     }
     
     function generatePinButtons(count){
-      var html = '<button type="button" class="btn btn-success btn-lg" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button>';
+      var html = '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button></div>';
       //var html = ''
       for(var i=0; i<=count; i++){
-        html += '<button type="button" class="btn btn-secondary btn-lg" onclick="advanceGame('+i+')">'+i+'</button>';
+        html += '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-secondary btn-lg" onclick="advanceGame('+i+')">'+i+'</button></div>';
       }
-      html += '<button type="button" class="btn btn-success btn-lg" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button>';
+      html += '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button></div>';
       return html;
     }
     
