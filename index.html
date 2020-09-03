@@ -490,12 +490,12 @@
     }
     
     function generatePinButtons(count){
-      var html = '<button type="button" class="btn btn-success" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button>';
+      var html = '<button type="button" class="btn btn-success btn-lg" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button>';
       //var html = ''
       for(var i=0; i<=count; i++){
-        html += '<button type="button" class="btn btn-secondary" onclick="advanceGame('+i+')">'+i+'</button>';
+        html += '<button type="button" class="btn btn-secondary btn-lg" onclick="advanceGame('+i+')">'+i+'</button>';
       }
-      html += '<button type="button" class="btn btn-success" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button>';
+      html += '<button type="button" class="btn btn-success btn-lg" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button>';
       return html;
     }
     
