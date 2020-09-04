@@ -349,81 +349,81 @@
       var html = "";
       for(var p=0; p<players.length; p++){
         playerIndex = p;
-        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col" style="background-color: #e6e6e6" id="player'+playerIndex+'header_th"><div class="d-flex" style="cursor: pointer" onmouseover="togglePlayerHeaderColor('+playerIndex+', \'#c6c6c6\')" onmouseout="togglePlayerHeaderColor('+playerIndex+', \'#e6e6e6\')" onclick="setPlayer('+playerIndex+')" id="player'+playerIndex+'header_div" data-toggle="tooltip" data-placement="bottom" title="Switch to this player"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
+        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col" style="background-color: #e6e6e6" id="player'+playerIndex+'header_th"><div class="d-flex" id="player'+playerIndex+'header_div" data-toggle="tooltip" data-placement="bottom" title="Switch to this player"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
         for(var i=1; i<=9; i++){
-          player_html += '<th colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'">'+i+'</th>';
+          player_html += '<th style="cursor: pointer" onclick="selectFrame('+playerIndex+', '+i+')" colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'">'+i+'</th>';
         }
-        player_html += '<th colspan="3" scope="col" style="width: 30px" id="player'+playerIndex+'_frame10">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
+        player_html += '<th style="cursor: pointer" colspan="3" onclick="selectFrame('+playerIndex+', 10)" scope="col" style="width: 30px" id="player'+playerIndex+'_frame10">10</th><th colspan="2" scope="col" style="width: 30px">Hdcp Score</th><th colspan="2" scope="col" style="width: 30px">Max Possible</th></tr></thead><tbody><tr style="height: 30px">';
         for(var i=0; i<21; i++){
           if(i==0){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame1-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 1)" scope="col" id="player'+playerIndex+'_frame1-1"></td>';
           }
           else if(i==1){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame1-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 1)" scope="col" id="player'+playerIndex+'_frame1-2"></td>';
           }
           else if(i==2){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame2-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 2)" scope="col" id="player'+playerIndex+'_frame2-1"></td>';
           }
           else if(i==3){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame2-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 2)" scope="col" id="player'+playerIndex+'_frame2-2"></td>';
           }
           else if(i==4){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame3-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 3)" scope="col" id="player'+playerIndex+'_frame3-1"></td>';
           }
           else if(i==5){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame3-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 3)" scope="col" id="player'+playerIndex+'_frame3-2"></td>';
           }
           else if(i==6){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame4-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 4)" scope="col" id="player'+playerIndex+'_frame4-1"></td>';
           }
           else if(i==7){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame4-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 4)" scope="col" id="player'+playerIndex+'_frame4-2"></td>';
           }
           else if(i==8){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame5-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 5)" scope="col" id="player'+playerIndex+'_frame5-1"></td>';
           }
           else if(i==9){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame5-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 5)" scope="col" id="player'+playerIndex+'_frame5-2"></td>';
           }
           else if(i==10){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame6-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 6)" scope="col" id="player'+playerIndex+'_frame6-1"></td>';
           }
           else if(i==11){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame6-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 6)" scope="col" id="player'+playerIndex+'_frame6-2"></td>';
           }
           else if(i==12){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame7-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 7)" scope="col" id="player'+playerIndex+'_frame7-1"></td>';
           }
           else if(i==13){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame7-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 7)" scope="col" id="player'+playerIndex+'_frame7-2"></td>';
           }
           else if(i==14){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame8-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 8)" scope="col" id="player'+playerIndex+'_frame8-1"></td>';
           }
           else if(i==15){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame8-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 8)" scope="col" id="player'+playerIndex+'_frame8-2"></td>';
           }
           else if(i==16){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame9-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 9)" scope="col" id="player'+playerIndex+'_frame9-1"></td>';
           }
           else if(i==17){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame9-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 9)" scope="col" id="player'+playerIndex+'_frame9-2"></td>';
           }
           else if(i==18){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-1"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 10)" scope="col" id="player'+playerIndex+'_frame10-1"></td>';
           }
           else if(i==19){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-2"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 10)" scope="col" id="player'+playerIndex+'_frame10-2"></td>';
           }
           else if(i==20){
-            player_html += '<td scope="col" id="player'+playerIndex+'_frame10-3"></td>';
+            player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 10)" scope="col" id="player'+playerIndex+'_frame10-3"></td>';
           }
         }
         player_html += '<td scope="col" colspan="2" id="handicapValue'+playerIndex+'"></td><td scope="col" colspan="2" id="maxScore'+playerIndex+'"></td></tr><tr style="height: 30px">';
         for(var i=0; i<9; i++){
-          player_html += '<td scope="col" colspan="2" id="player'+playerIndex+'_frameScore'+(i+1)+'"></td>';
+          player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', '+(i+1)+')" scope="col" colspan="2" id="player'+playerIndex+'_frameScore'+(i+1)+'"></td>';
         }
-        player_html += '<td scope="col" colspan="3" id="player'+playerIndex+'_frameScore10"></td></tr></tbody></table>';
+        player_html += '<td style="cursor: pointer" onclick="selectFrame('+playerIndex+', 10)" scope="col" colspan="3" id="player'+playerIndex+'_frameScore10"></td></tr></tbody></table>';
         html += player_html;
       }
       $("#game").html(html);
@@ -489,17 +489,25 @@
       setActiveFrame(selectedPlayer, selectedFrame);
     }
     
+    function selectFrame(player, frame){
+      selectedPlayer = player;
+      selectedFrame = frame;
+      generateScoreBox();
+      //console.log("player: "+player);
+      //console.log("frame: "+frame);
+    }
+    
     function generatePinButtons(count){
-      var html = '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button></div>';
-      //var html = ''
+      //var html = '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="previousFrame()" data-toggle="tooltip" data-placement="left" title="Go to previous frame"><<</button></div>';
+      var html = ''
       for(var i=0; i<=count; i++){
         html += '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-secondary btn-lg" onclick="advanceGame('+i+')">'+i+'</button></div>';
       }
-      html += '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button></div>';
+      //html += '<div class="btn-group mr-2 p-2" role="group"><button type="button" class="btn btn-success btn-lg" onclick="nextFrame()" data-toggle="tooltip" data-placement="right" title="Go to next frame">>></button></div>';
       return html;
     }
     
-    function setPlayer(player){
+    /*function setPlayer(player){
       selectedPlayer = player;
       //currentPlayer = player;
       //adjustSubFrame();
@@ -574,7 +582,7 @@
       //  var available_pins = 10;
       //}
       //$("#pins").html(generatePinButtons(available_pins));
-    }
+    }*/
     
     function updateHandicapLabel(value){
       $("#handicapSelecterLabel").html("Handicap: "+value);
