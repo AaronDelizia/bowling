@@ -98,6 +98,7 @@
     var selectedFrame = 1;
     var playerIndex = 0;
     var editMode = false;
+    var clicked_on_frame = false;
     
     $('#editPlayer').on('show.bs.modal', function (event) {
       var button = $(event.relatedTarget);
@@ -164,6 +165,7 @@
     });
     
     function advanceGame(pinCount){
+      clicked_on_frame = false;
       if(currentPlayer != selectedPlayer || currentFrame != selectedFrame){
         var player = selectedPlayer;
         var frame = selectedFrame;
@@ -380,7 +382,7 @@
       var html = "";
       for(var p=0; p<players.length; p++){
         playerIndex = p;
-        var player_html = '<table class="table table-bordered table-sm"><thead><tr><th colspan="25" scope="col" style="background-color: #e6e6e6" id="player'+playerIndex+'header_th"><div class="d-flex" id="player'+playerIndex+'header_div" data-toggle="tooltip" data-placement="bottom" title="Switch to this player"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
+        var player_html = '<table class="table table-bordered table-sm" id="player'+playerIndex+'table"><thead><tr><th colspan="25" scope="col" style="background-color: #e6e6e6" id="player'+playerIndex+'header_th"><div class="d-flex" id="player'+playerIndex+'header_div" data-toggle="tooltip" data-placement="bottom" title="Switch to this player"><button type="button" class="btn btn-info btn-sm p-2" data-toggle="modal" data-target="#editPlayer" data-player-index='+playerIndex+' id="playerButton'+playerIndex+'">'+players[playerIndex].name+'</button><button type="button" class="btn btn-danger btn-sm ml-auto p-2" data-toggle="modal" data-target="#confirmDeletePlayer" data-player-index='+playerIndex+' id="deletePlayer">Delete</button></div></th></tr><tr>';
         for(var i=1; i<=9; i++){
           player_html += '<th style="cursor: pointer" onclick="selectFrame('+playerIndex+', '+i+')" colspan="2" scope="col" style="width: 30px" id="player'+playerIndex+'_frame'+i+'">'+i+'</th>';
         }
@@ -517,7 +519,11 @@
         $("#handicapValue"+playerIndex).html(parseInt(total_score)+parseInt(players[playerIndex].handicap));
         $("#maxScore"+playerIndex).html(max_score);
       }
+      setCurrentFrame(currentPlayer, currentFrame);
       setActiveFrame(selectedPlayer, selectedFrame);
+      if(!clicked_on_frame){
+        document.getElementById("player"+selectedPlayer+"table").scrollIntoView({block: "end", inline: "nearest", behavior: "smooth"});
+      }
     }
     
     function calculatePlayerScore(player){
@@ -537,6 +543,7 @@
     function selectFrame(player, frame){
       selectedPlayer = player;
       selectedFrame = frame;
+      clicked_on_frame = true;
       generateScoreBox();
     }
     
@@ -606,6 +613,15 @@
         }
       }
       changeFrameColor(player, frame, "#add8e6");
+    }
+    
+    function setCurrentFrame(player, frame){
+      for(var p=0; p<players.length; p++){
+        for(var f=0; f<10; f++){
+          changeFrameColor(p, f, getFrameColor(p, f));
+        }
+      }
+      changeFrameColor(player, frame, "#ffb0b0");
     }
     
     function setFinishedFrame(player, frame){
