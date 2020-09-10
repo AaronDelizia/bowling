@@ -30,7 +30,7 @@
           <div class="modal-body">
             <input type="text" class="form-control mb-5" aria-describedby="nameHelp" placeholder="Enter Name" id="playerName">
             <label for="handicapSelecter" id="handicapSelecterLabel"></label><br>
-            <input type="range" class="custom-range w-100" min="0" max="300" id="handicapSelecter" onmousemove="updateHandicapLabel(this.value)">
+            <input type="range" class="custom-range w-100" min="0" max="300" id="handicapSelecter" onmousemove="updateHandicapLabel(this.value)" ontouchmove="updateHandicapLabel(this.value)">
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" id="savePlayer">Save</button>
@@ -139,7 +139,8 @@
       }
       $("#playerButton"+playerIndex).html(players[playerIndex].name);
       players[playerIndex].handicap = $("#handicapSelecter").val();
-      $("#handicapValue"+playerIndex).html(players[playerIndex].handicap);
+      var playerScores = calculatePlayerScore(playerIndex);
+      $("#handicapValue"+playerIndex).html(playerScores.hcScore);
       $("#editPlayer").modal('hide');
     });
     
@@ -220,7 +221,7 @@
             if(currentSubFrame == 2 && lastFrame_sub1Pins == 10 && thisFrame_sub1Pins == 10){
               players[player].frameScores[frame-1] = thisFrame_sub1Pins + lastFrame_sub1Pins + thisFrame_sub2Pins;
             }
-            else if(currentSubFrame == 3){
+            else if(currentSubFrame == 3 && (thisFrame_sub2Pins == 10 || thisFrame_sub1Pins+thisFrame_sub2Pins == 10)){
               players[player].frameScores[frame] = thisFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub3Pins;
             }
           }
@@ -230,6 +231,10 @@
       // Rotate player & frame logic
       if(!editMode){
         if(players.length > 1 && currentPlayer == players.length-1){
+          console.log(currentFrame);
+          console.log(currentSubFrame);
+          console.log(pinCount);
+          console.log(players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame]);
           currentPlayer = 0;
           selectedPlayer = 0;
           if(currentSubFrame == 1){
@@ -241,7 +246,7 @@
           else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
             currentSubFrame++;
           }
-          else{
+          else if(currentFrame < 10 && currentSubFrame < 3){
             currentSubFrame = 1;
             currentFrame++;
             selectedFrame++;
@@ -250,6 +255,12 @@
         else if(players.length > 1 && currentPlayer < players.length-1){
           currentPlayer++;
           selectedPlayer++;
+          if(currentFrame == 10 && currentSubFrame == 2 && pinCount == 10){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+            currentSubFrame++;
+          }
         }
         else if(players.length == 1){
           if(currentSubFrame == 1){
@@ -261,10 +272,29 @@
           else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
             currentSubFrame++;
           }
-          else{
+          else if(currentFrame < 10 && currentSubFrame < 3){
             currentSubFrame = 1;
             currentFrame++;
             selectedFrame++;
+          }
+        }
+        if(currentFrame == 10 && currentSubFrame == 3 && players.length > 1){
+          var frame_10_total = players[currentPlayer].frames[currentFrame][currentSubFrame-2]+players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+          var index = 0;
+          while(frame_10_total < 10){
+            if(currentPlayer == players.length-1){
+              currentPlayer = 0;
+              selectedPlayer = 0;
+            }
+            else{
+              currentPlayer++;
+              selectedPlayer++;
+            }
+            frame_10_total = players[currentPlayer].frames[currentFrame][currentSubFrame-2]+players[currentPlayer].frames[currentFrame][currentSubFrame-1];
+            index++;
+            if(index == players.length){
+              break;
+            }
           }
         }
         if(currentFrame < 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
@@ -298,10 +328,10 @@
       if(currentSubFrame == 2){
         if(frame < 10){
           var available_pins = 10-players[player].frames[frame][currentSubFrame-1];
-          console.log("available pins: "+available_pins);
-          console.log("player: "+currentPlayer);
-          console.log("frame: "+currentFrame);
-          console.log("edit mode: "+editMode);
+          //console.log("available pins: "+available_pins);
+          //console.log("player: "+currentPlayer);
+          //console.log("frame: "+currentFrame);
+          //console.log("edit mode: "+editMode);
           $("#pins").html(generatePinButtons(available_pins));
         }
         else if(frame == 10 && players[player].frames[frame][currentSubFrame-1] == 10){
@@ -487,6 +517,20 @@
         $("#maxScore"+playerIndex).html(max_score);
       }
       setActiveFrame(selectedPlayer, selectedFrame);
+    }
+    
+    function calculatePlayerScore(player){
+      var frameScores = players[player].frameScores;
+      var total_score = 0;
+      var max_score = 300;
+      for(var score in frameScores){
+        if(frameScores[score] != null){
+          var max_deduction = 30-frameScores[score];
+          max_score -= max_deduction;
+          total_score += frameScores[score];
+        }
+      }
+      return { maxScore: max_score, hcScore: parseInt(total_score)+parseInt(players[player].handicap) }
     }
     
     function selectFrame(player, frame){
