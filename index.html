@@ -234,10 +234,6 @@
       // Rotate player & frame logic
       if(!editMode){
         if(players.length > 1 && currentPlayer == players.length-1){
-          console.log(currentFrame);
-          console.log(currentSubFrame);
-          console.log(pinCount);
-          console.log(players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame]);
           currentPlayer = 0;
           selectedPlayer = 0;
           if(currentSubFrame == 1){
