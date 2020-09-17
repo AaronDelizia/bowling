@@ -235,6 +235,9 @@
               else if(currentSubFrame == 3 && (thisFrame_sub2Pins == 10 || thisFrame_sub1Pins+thisFrame_sub2Pins == 10)){
                 players[player].frameScores[frame] = thisFrame_sub1Pins + thisFrame_sub2Pins + thisFrame_sub3Pins;
               }
+              else if(currentSubFrame == 3){
+                players[player].frameScores[frame] = pinCount;
+              }
             }
           }
         }
@@ -293,6 +296,9 @@
             currentSubFrame++;
           }
           else if(currentFrame == 10 && currentSubFrame == 2 && (players[currentPlayer].frames[currentFrame][currentSubFrame-1]+players[currentPlayer].frames[currentFrame][currentSubFrame] == 10)){
+            currentSubFrame++;
+          }
+          else if(currentFrame == 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
             currentSubFrame++;
           }
           else if(currentFrame < 10 && currentSubFrame < 3){
@@ -484,9 +490,12 @@
               if(frames[frame][1] < 10 && (frames[frame][1]+frames[frame][2]) == 10){
                 $("#player"+playerIndex+"_frame"+frame+"-2").html("/");
               }
-              else if(frames[frame][1] < 10 && (frames[frame][1]+frames[frame][2]) < 10){
+              else if((frames[frame][1] < 10 && (frames[frame][1]+frames[frame][2]) < 10) || (frame == 10 && frames[frame][1] == 10)){
                 $("#player"+playerIndex+"_frame"+frame+"-2").html(frames[frame][2]);
               }
+            }
+            else if(frames[frame][2] == 10 && frames[frame][1] == 0){
+              $("#player"+playerIndex+"_frame"+frame+"-2").html("/");
             }
             else if(frame == 10 && frames[frame][2] == 10){
               $("#player"+playerIndex+"_frame"+frame+"-2").html("X");
