@@ -310,7 +310,7 @@
         if(currentFrame < 10 && currentSubFrame == 2 && players[currentPlayer].frames[currentFrame][currentSubFrame-1] == 10){
           advanceGame(10);
         }
-        if(skip_player){
+        if(skip_player && currentPlayer < players.length-1){
           advanceGame(-1);
         }
       }
